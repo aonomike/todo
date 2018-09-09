@@ -1,34 +1,27 @@
 from flask import Flask, request, jsonify, make_response
-from flask_sqlalchemy import SQLAlchemy
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 from functools import wraps
+from models import User, Todo, db
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'thisissecret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/globalprograms/Work/Training/Python/flask/todo/todo.db'
-
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    public_id = db.Column(db.String(50), unique=True)
-    name = db.Column(db.String(50))
-    password = db.Column(db.String(80))
-    admin = db.Column(db.Boolean)
-
-
-class Todo(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String(50))
-    complete = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer)
+# sqlite_uri='sqlite:////Users/globalprograms/Work/Training/Python/flask/todo/todo.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_uri
+POSTGRES = {
+    'user': 'globalprograms',
+    'pw': 'postgres',
+    'db': 'todo',
+    'host': 'localhost',
+    'port': '5432',
+}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+app.config['DEBUG'] = True
+db.init_app(app)
 
 
 def token_required(funct):
